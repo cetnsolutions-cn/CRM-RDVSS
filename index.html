@@ -163,10 +163,7 @@
                         <div class="flex-1 flex flex-col md:flex-row md:items-center gap-3">
                             <h2 class="text-2xl md:text-3xl font-bold text-slate-800 uppercase tracking-tight">{{ currentFullDateLabel }}</h2>
                             
-                            <button @click="showLive" :class="activeRdvCount > 0 ? 'bg-green-100 text-green-700 border-green-200 animate-pulse' : 'bg-slate-100 text-slate-400 border-slate-200'" class="flex items-center gap-2 px-4 py-2 rounded-full font-bold border transition shadow-sm hover:shadow-md">
-                                <span :class="activeRdvCount > 0 ? 'bg-green-500' : 'bg-slate-300'" class="w-3 h-3 rounded-full block"></span>
-                                {{ activeRdvCount }} En cours
-                            </button>
+                           
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex items-center gap-4 min-w-[300px] relative overflow-hidden" :class="conversionRateColor"><div class="absolute inset-0 bg-white opacity-80 z-0"></div><div class="z-10 text-5xl emoji-bounce filter drop-shadow-md">{{ conversionEmoji }}</div><div class="z-10 flex-1"><p class="text-xs font-bold uppercase tracking-widest opacity-60">Taux de conversion</p><div class="flex items-baseline gap-2"><span class="text-4xl font-black">{{ conversionRate }}%</span><span class="text-xs font-medium opacity-70">Honorés / Total</span></div><div class="w-full bg-black/10 h-1.5 rounded-full mt-1 overflow-hidden"><div class="h-full bg-black/50 transition-all duration-1000" :style="{width: conversionRate + '%'}"></div></div></div></div>
                     </div>
@@ -176,8 +173,28 @@
                         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition"><div class="flex justify-between items-start"><div><p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Pas Venus</p><p class="text-4xl font-extrabold text-slate-800 mt-1">{{ stats.noshow }}</p></div><div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 text-xl"><i class="fa-solid fa-user-xmark"></i></div></div></div>
                     </div>
                     <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 md:p-8">
-                        <h2 class="text-xl font-bold mb-6 flex items-center gap-3 text-slate-800"><i class="fa-regular fa-clock text-blue-500"></i> Timeline Aujourd'hui</h2>
-                        <div class="space-y-4 relative"><div class="absolute left-[35px] top-4 bottom-4 w-0.5 bg-slate-100 z-0"></div>
+<div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
+                            <h2 class="text-xl font-bold flex items-center gap-3 text-slate-800"><i class="fa-regular fa-clock text-blue-500"></i> Timeline Aujourd'hui</h2>
+                            
+                            <div class="flex flex-wrap gap-2 w-full xl:w-auto">
+                                <select v-model="dashboardFilters.agencyId" class="bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-lg px-3 py-2 outline-none focus:border-blue-500 shadow-sm">
+                                    <option value="">Toutes les agences</option>
+                                    <option v-for="ag in agences" :key="ag.id" :value="ag.id">{{ ag.nom }}</option>
+                                </select>
+
+                                <select v-model="dashboardFilters.userId" class="bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-lg px-3 py-2 outline-none focus:border-blue-500 shadow-sm">
+                                    <option value="">Tous les utilisateurs</option>
+                                    <option v-for="u in allProspectors" :key="u" :value="u">{{ u }}</option>
+                                </select>
+
+                               <button @click="dashboardFilters.onlyLive = !dashboardFilters.onlyLive" 
+                                        :class="dashboardFilters.onlyLive ? 'bg-green-500 text-white shadow-green-200 shadow-md' : (timelineActiveCount > 0 ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-slate-400 border-slate-200')"
+                                        class="px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-2 border">
+                                    <span :class="timelineActiveCount > 0 ? 'bg-green-500 animate-pulse' : 'bg-slate-300'" class="w-2 h-2 rounded-full block"></span>
+                                    {{ timelineActiveCount }} En cours
+                                </button>
+                            </div>
+                        </div>                        <div class="space-y-4 relative"><div class="absolute left-[35px] top-4 bottom-4 w-0.5 bg-slate-100 z-0"></div>
                             <div v-for="rdv in sortedDaily" :key="rdv.id" @click="openRdvFiche(rdv)" class="relative z-10 flex flex-col md:flex-row md:items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:bg-white hover:border-blue-200 hover:shadow-lg cursor-pointer transition group gap-2 md:gap-0">
                                 <div class="flex items-center w-full md:w-auto">
                                     <div class="w-16 md:w-20 font-bold text-lg text-slate-500 group-hover:text-blue-600 transition text-center bg-white rounded-xl py-2 mr-4 shadow-sm border border-slate-100 flex-shrink-0">{{ rdv.heure }}</div>
@@ -215,7 +232,11 @@
                                     <div class="ml-4 text-slate-300 group-hover:text-blue-500 transition"><i class="fa-solid fa-chevron-right"></i></div>
                                 </div>
                             </div>
-                            <div v-if="sortedDaily.length===0" class="text-center text-slate-400 py-10 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200"><i class="fa-solid fa-mug-hot text-2xl mb-2"></i><br>Aucun rendez-vous aujourd'hui.</div>
+                           <div v-if="filteredDaily.length > dashboardLimit" class="text-center pt-4 border-t mt-2">
+                            <button @click="dashboardLimit += 15" class="bg-white border border-slate-200 text-slate-500 px-6 py-2 rounded-full text-sm font-bold hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition shadow-sm">
+                                👇 Voir la suite ({{ filteredDaily.length - dashboardLimit }} de plus)
+                            </button>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -616,6 +637,9 @@
             const view = ref('dashboard');
             const currentFilter = ref('all'); 
             const listFilters = reactive({ agenceId: '', date: '', prospecteur: '' }); // ADDED prospecteur
+            // --- AJOUT TIMELINE ---
+            const dashboardFilters = reactive({ agencyId: '', userId: '', onlyLive: false });
+            const dashboardLimit = ref(15);
             const displayLimit = ref(20); // PAGINATION
 
             const now = ref(new Date()); 
@@ -1002,7 +1026,49 @@
             const afternoonSlots = ['14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'];
             const timeSlots = [...morningSlots, ...afternoonSlots]; 
 
-            const sortedDaily = computed(() => { return rdvList.value.filter(r => r.date === filters.date && r.statut !== 'poubelle').sort((a,b) => a.heure.localeCompare(b.heure)).map(r => ({...r, agenceNom: agences.value.find(a=>a.id===r.agenceId)?.nom})); });
+// --- NOUVELLE LOGIQUE TIMELINE (VERSION CORRIGÉE) ---
+
+            // 1. On calcule la liste complète selon tes filtres (Agence, User, En cours)
+            const filteredDaily = computed(() => { 
+                // Sécurité : si les données ne sont pas encore chargées, on renvoie vide pour éviter le bug
+                if (!rdvList.value) return [];
+
+                let list = rdvList.value.filter(r => r.date === filters.date && r.statut !== 'poubelle');
+
+                // Filtre Agence
+                if (dashboardFilters.agencyId) {
+                    list = list.filter(r => r.agenceId === dashboardFilters.agencyId);
+                }
+                // Filtre Utilisateur
+                if (dashboardFilters.userId) {
+                    list = list.filter(r => r.createdBy === dashboardFilters.userId);
+                }
+                // Filtre En Cours
+                if (dashboardFilters.onlyLive) {
+                    list = list.filter(r => isEnCours(r));
+                }
+
+                // Tri par heure + Ajout du nom de l'agence
+                return list.sort((a,b) => a.heure.localeCompare(b.heure)).map(r => ({...r, agenceNom: agences.value.find(a=>a.id===r.agenceId)?.nom})); 
+            });
+
+            // 2. On coupe la liste pour l'affichage (Pagination : 15, 30, 45...)
+            const displayedDaily = computed(() => {
+                return filteredDaily.value.slice(0, dashboardLimit.value);
+            });
+
+            // 3. FIX DU BUG : On utilise "computed" ici aussi pour forcer l'affichage immédiat
+            const sortedDaily = computed(() => displayedDaily.value);
+            // Calculer le nombre de RDV en cours (selon les filtres Agence/User choisis)
+            const timelineActiveCount = computed(() => {
+                if (!rdvList.value) return 0;
+                let list = rdvList.value.filter(r => r.date === filters.date && r.statut !== 'poubelle');
+                // On applique les mêmes filtres que la liste
+                if (dashboardFilters.agencyId) list = list.filter(r => r.agenceId === dashboardFilters.agencyId);
+                if (dashboardFilters.userId) list = list.filter(r => r.createdBy === dashboardFilters.userId);
+                // On compte ceux qui sont actifs
+                return list.filter(r => isEnCours(r)).length;
+            });
             const isSoon = (dStr) => { const diff = (new Date(dStr) - new Date()) / (1000*3600*24); return diff > -0.5 && diff < 2; };
             const isCreatedToday = (d) => { if (!d) return false; const date = new Date(d); const today = new Date(); return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear(); };
             const rappelsList = computed(() => rdvList.value.filter(r => ['confirme','a_confirmer'].includes(r.statut) && !r.rappelFait && isSoon(r.date) && !isCreatedToday(r.created) ));
@@ -1054,7 +1120,7 @@
                 // NEW VARS
                 teamList, newMember, addTeamMember, toggleBlockTeamMember, deleteTeamMember, mobileMenuOpen, welcomeModal,
                 adminNamesList, newAdminName, addAdminName, removeAdminName,
-                newNoteText, addNote, showDiscountInput, allProspectors
+                newNoteText, addNote,showDiscountInput, allProspectors, dashboardFilters, dashboardLimit, filteredDaily, timelineActiveCount
             };
         }
     }).mount('#app');
