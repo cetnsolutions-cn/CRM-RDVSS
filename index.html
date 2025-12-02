@@ -315,12 +315,15 @@
                         </button>
                     </div>
 
-                    <div v-if="selectedIds.length > 0" class="absolute bottom-6 left-4 right-4 md:left-6 md:right-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center justify-between slide-up z-20 gap-3">
+                 <div v-if="selectedIds.length > 0" class="absolute bottom-6 left-4 right-4 md:left-6 md:right-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center justify-between slide-up z-20 gap-3">
                         <div class="font-bold pl-2"><span class="text-blue-400 text-xl">{{ selectedIds.length }}</span> sélectionnés</div>
                         <div class="flex gap-2 w-full md:w-auto justify-end">
-                            <button @click="openBulkConfirm('restore_trash', 'Restaurer')" class="bg-green-600 hover:bg-green-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Tout Restaurer</button>
-                            <button v-if="user.role==='admin'" @click="openBulkConfirm('delete_trash', 'Supprimer définitivement')" class="bg-red-600 hover:bg-red-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Tout Supprimer</button>
-                            <button @click="selectedIds=[]" class="ml-2 text-gray-400 hover:text-white px-2">✕</button>
+                            
+                            <button @click="openBulkConfirm('soft_delete', 'Envoyer les ' + selectedIds.length + ' RDV à la corbeille')" class="bg-orange-100 text-orange-700 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none shadow-lg hover:bg-orange-200">
+                                <i class="fa-solid fa-trash-can mr-2"></i> Mettre à la corbeille ({{ selectedIds.length }})
+                            </button>
+                            
+                            <button @click="selectedIds=[]" class="ml-2 text-gray-400 hover:text-white px-2 transition">✕</button>
                         </div>
                     </div>
                 </div>
@@ -357,7 +360,7 @@
                             <div class="flex gap-2 justify-end mt-2 pt-2 border-t"><button @click="restoreRdv(rdv)" class="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-green-200 transition">Restaurer</button><button v-if="user.role==='admin'" @click="hardDeleteRdv(rdv)" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-red-200 transition">Supprimer</button></div>
                         </div>
                     </div>
-                    <div v-if="selectedIds.length > 0" class="absolute bottom-6 left-4 right-4 md:left-6 md:right-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center justify-between slide-up z-20 gap-3"><div class="font-bold pl-2"><span class="text-blue-400 text-xl">{{ selectedIds.length }}</span> sélectionnés</div><div class="flex gap-2 w-full md:w-auto justify-end"><button @click="openBulkConfirm('restore_trash', 'Restaurer')" class="bg-green-600 hover:bg-green-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Tout Restaurer</button><button v-if="user.role==='admin'" @click="openBulkConfirm('delete_trash', 'Supprimer définitivement')" class="bg-red-600 hover:bg-red-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Tout Supprimer</button><button @click="selectedIds=[]" class="ml-2 text-gray-400 hover:text-white px-2">✕</button></div></div>
+                    <div v-if="selectedIds.length > 0" class="absolute bottom-6 left-4 right-4 md:left-6 md:right-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row items-center justify-between slide-up z-20 gap-3"><div class="font-bold pl-2"><span class="text-blue-400 text-xl">{{ selectedIds.length }}</span> sélectionnés</div><div class="flex gap-2 w-full md:w-auto justify-end"><button @click="openBulkConfirm('restore_trash', 'Restaurer')" class="bg-green-600 hover:bg-green-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Restaurer</button><button v-if="user.role==='admin'" @click="openBulkConfirm('delete_trash', 'Supprimer définitivement')" class="bg-red-600 hover:bg-red-500 px-3 md:px-4 py-2 rounded-lg font-bold text-xs md:text-sm transition flex-1 md:flex-none">Supprimer</button><button @click="selectedIds=[]" class="ml-2 text-gray-400 hover:text-white px-2">✕</button></div></div>
                 </div>
                 
                 <div v-if="view==='pending_status'" class="max-w-3xl mx-auto space-y-4 fade-in"><h2 class="text-xl md:text-2xl font-bold mb-6 text-purple-700"><i class="fa-solid fa-clipboard-question"></i> Statuts à définir</h2><div v-if="pendingStatusList.length===0" class="bg-white p-10 rounded-2xl text-center text-gray-400 border border-slate-100 shadow-sm"><i class="fa-solid fa-check-circle text-4xl mb-2 text-green-500"></i><br>Tous les statuts sont à jour !</div><div v-for="r in pendingStatusList" :key="r.id" class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border-l-4 border-purple-500 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition group" @click="openRdvFiche(r)"><div class="cursor-pointer flex-1"><div class="font-bold text-lg flex items-center gap-2">{{ r.civilite }} {{ r.nom }} <span class="text-xs bg-gray-100 text-gray-500 px-2 rounded">Terminé</span></div><div class="text-slate-500">{{ formatDateFr(r.date) }} à {{ r.heure }} • {{ r.modele }}</div><div class="text-sm font-bold text-blue-600 mt-1">{{ getAgenceName(r.agenceId) }}</div></div><div class="flex gap-2 w-full md:w-auto"><button @click.stop="updateStatus(r, 'honor_fact')" class="flex-1 md:flex-none bg-green-100 text-green-700 px-4 py-2 rounded-xl font-bold hover:bg-green-200 border border-green-200 text-sm"><i class="fa-solid fa-check"></i> Honoré</button><button @click.stop="updateStatus(r, 'noshow')" class="flex-1 md:flex-none bg-red-100 text-red-700 px-4 py-2 rounded-xl font-bold hover:bg-red-200 border border-red-200 text-sm"><i class="fa-solid fa-user-xmark"></i> Lapin</button></div></div></div>
@@ -859,14 +862,68 @@
             const toggleSelection = (id) => { if(selectedIds.value.includes(id)) { selectedIds.value = selectedIds.value.filter(i => i !== id); } else { selectedIds.value.push(id); } };
             const isAllSelected = computed(() => { const list = view.value === 'trash' ? trashList.value : filteredList.value; return list.length > 0 && selectedIds.value.length === list.length; });
 
-            const openBulkConfirm = (action, label) => { bulkModal.action = action; bulkModal.label = label; bulkModal.open = true; };
-            const executeBulkAction = async () => { 
-                const batch = db.batch(); 
-                if(bulkModal.action === 'restore_trash') { selectedIds.value.forEach(id => { const ref = db.collection('rendezvous').doc(id); batch.update(ref, { statut: 'confirme' }); }); }
-                else if(bulkModal.action === 'delete_trash') { selectedIds.value.forEach(id => { const ref = db.collection('rendezvous').doc(id); batch.delete(ref); }); }
-                else if(bulkModal.action === 'empty_trash') { trashList.value.forEach(r => { const ref = db.collection('rendezvous').doc(r.id); batch.delete(ref); }); }
-                else { let patch = {}; if(bulkModal.action === 'delete') { patch = { statut: 'poubelle' }; } else if (bulkModal.action === 'honor_fact') { patch = { statut: 'honore', honorBilling: 'facture' }; } else if (bulkModal.action === 'noshow') { patch = { statut: 'pas_venu', honorBilling: null }; } selectedIds.value.forEach(id => { const ref = db.collection('rendezvous').doc(id); batch.update(ref, patch); }); }
-                await batch.commit(); selectedIds.value = []; bulkModal.open = false; 
+// CORRECTION : On utilise la confirmation directe
+          // 1. CONFIRMATION (Fenêtre système simple)
+            const openBulkConfirm = (action, label) => {
+                if (confirm("⚠️ Êtes-vous sûr de vouloir : " + label + " ?")) {
+                    bulkModal.action = action;
+                    executeBulkAction();
+                }
+            };
+
+            // 2. EXÉCUTION (Logique corrigée)
+          const executeBulkAction = async () => {
+                const batch = db.batch();
+
+                // CAS 1 : (NOUVEAU) Mettre à la corbeille depuis la liste principale
+                if (bulkModal.action === 'soft_delete') {
+                    selectedIds.value.forEach(id => {
+                        const ref = db.collection('rendezvous').doc(id);
+                        batch.update(ref, { statut: 'poubelle' });
+                    });
+                }
+
+                // CAS 2 : Restaurer depuis la poubelle (Ce qu'on a fait avant)
+                else if (bulkModal.action === 'restore_selection' || bulkModal.action === 'restore_trash') {
+                    selectedIds.value.forEach(id => {
+                        const ref = db.collection('rendezvous').doc(id);
+                        batch.update(ref, { statut: 'confirme' });
+                    });
+                }
+
+                // CAS 3 : Supprimer DÉFINITIVEMENT depuis la poubelle (Ce qu'on a fait avant)
+                else if (bulkModal.action === 'delete_selection' || bulkModal.action === 'delete_trash') {
+                    selectedIds.value.forEach(id => {
+                        const ref = db.collection('rendezvous').doc(id);
+                        batch.delete(ref);
+                    });
+                }
+
+                // CAS 4 : Vider toute la corbeille
+                else if (bulkModal.action === 'empty_trash') {
+                    trashList.value.forEach(r => {
+                        const ref = db.collection('rendezvous').doc(r.id);
+                        batch.delete(ref);
+                    });
+                }
+                
+                // CAS 5 : Autres actions (Sécurité pour le reste du site)
+                else {
+                    let patch = {};
+                    if (bulkModal.action === 'honor_fact') { patch = { statut: 'honore', honorBilling: 'facture' }; }
+                    else if (bulkModal.action === 'noshow') { patch = { statut: 'pas_venu', honorBilling: null }; }
+                    
+                    if(Object.keys(patch).length > 0) {
+                        selectedIds.value.forEach(id => {
+                            const ref = db.collection('rendezvous').doc(id);
+                            batch.update(ref, patch);
+                        });
+                    }
+                }
+
+                await batch.commit();
+                selectedIds.value = []; 
+                bulkModal.open = false;
             };
 
             const formatDateFr = (d) => d ? new Date(d).toLocaleDateString('fr-FR') : '';
